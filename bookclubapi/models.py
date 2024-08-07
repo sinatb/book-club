@@ -41,6 +41,7 @@ class Book(models.Model):
     class Meta:
         verbose_name = _("Book")
         verbose_name_plural = _("Books")
+        ordering = ['publish_date']
 
     def __str__(self):
         return self.name
@@ -56,6 +57,9 @@ class Like(models.Model):
         verbose_name_plural = _("Likes")
         unique_together = ('user', 'book')
 
+    def __str__(self):
+        return f"{self.user} liked {self.book}"
+
 
 class Comment(models.Model):
 
@@ -69,6 +73,9 @@ class Comment(models.Model):
         verbose_name_plural = _("comments")
         unique_together = ("user", "book")
 
+    def __str__(self):
+        return f"{self.user} commented on {self.book}"
+
 
 class Report(models.Model):
 
@@ -80,3 +87,6 @@ class Report(models.Model):
         verbose_name = _("Report")
         verbose_name_plural = _("Reports")
         unique_together = ('user', 'comment')
+
+    def __str__(self):
+        return f"{self.user} reported {self.comment}"
