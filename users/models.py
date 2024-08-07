@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
@@ -13,7 +13,9 @@ class User(AbstractUser):
     )
 
     user_type = models.CharField(_("User Type"), max_length=10, choices=USER_TYPE_CHOICES)
-    email = models.CharField(_("Email Address"), max_length=255, unique=True)
+    email = models.EmailField(_("Email Address"), max_length=255, unique=True)
+
+    REQUIRED_FIELDS = ['email', 'user_type']
 
     def is_basic(self):
         return self.user_type == "basic"
