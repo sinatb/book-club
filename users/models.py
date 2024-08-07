@@ -12,7 +12,7 @@ class User(AbstractUser):
         ("publisher", "Publisher")
     )
 
-    user_type = models.CharField(_("User Type"), choices=USER_TYPE_CHOICES)
+    user_type = models.CharField(_("User Type"), max_length=10, choices=USER_TYPE_CHOICES)
     email = models.CharField(_("Email Address"), max_length=255, unique=True)
 
     def is_basic(self):
