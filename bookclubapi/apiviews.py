@@ -1,52 +1,40 @@
-from rest_framework import generics
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
 from .models import Book
 
 
-class BookListAPIView(generics.ListCreateAPIView):
+class BookList(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     pass
 
 
-class BookDetailAPIView(APIView):
-
-    def get(self, request, pk):
-        return Response({})
-
-    def delete(self, request, pk):
-        return Response({})
+class BookDetail(generics.RetrieveDestroyAPIView):
+    pass
 
 
-class CommentListAPIView(APIView):
-
-    def post(self, request, pk):
-        return Response({})
+class CommentCreate(generics.CreateAPIView):
+    pass
 
 
-class CommentDetailAPIView(APIView):
-
-    def get(self, request, pk):
-        return Response({})
-
-    def delete(self, request, pk):
-        return Response({})
+class CommentDetail(generics.RetrieveDestroyAPIView):
+    pass
 
 
-class ReporterListAPIView(APIView):
-
-    def post(self, request):
-        return Response({})
+class ReportCreate(generics.CreateAPIView):
+    pass
 
 
-class CommentsReportListAPIView(APIView):
-    def get(self, request, pk):
-        return Response({})
+class CreateLike(generics.CreateAPIView):
+    pass
 
 
-class BooksCommentListAPIView(APIView):
+@api_view(['GET'])
+def get_comment_reports(self, request, pk):
+    return Response({})
 
-    def get(self, request, pk):
-        return Response({})
+@api_view(['GET'])
+def get_book_comments(self, request, pk):
+    return Response({})
 
