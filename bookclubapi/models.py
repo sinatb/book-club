@@ -32,10 +32,10 @@ class Book(models.Model):
 
     name = models.CharField(max_length=100)
     publisher = models.ForeignKey(User, on_delete=models.CASCADE)
-    rating = models.FloatField()
-    rating_count = models.IntegerField()
+    rating = models.FloatField(default=0)
+    rating_count = models.IntegerField(default=0)
     publish_date = models.DateTimeField()
-    like_count = models.IntegerField()
+    like_count = models.IntegerField(default=0)
     Genre = models.CharField(max_length=100)
 
     class Meta:
