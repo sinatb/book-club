@@ -1,12 +1,10 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
 from .models import Book
 
 
 class BookList(generics.ListCreateAPIView):
-    queryset = Book.objects.all()
     pass
 
 
@@ -33,6 +31,7 @@ class CreateLike(generics.CreateAPIView):
 @api_view(['GET'])
 def get_comment_reports(self, request, pk):
     return Response({})
+
 
 @api_view(['GET'])
 def get_book_comments(self, request, pk):
