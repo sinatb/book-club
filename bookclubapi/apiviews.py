@@ -1,14 +1,13 @@
+from rest_framework import generics
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework.response import Response
+from .models import Book
 
 
-class BookListAPIView(APIView):
-
-    def get(self, request):
-        return Response({})
-
-    def post(self, request):
-        return Response({})
+class BookListAPIView(generics.ListCreateAPIView):
+    queryset = Book.objects.all()
+    pass
 
 
 class BookDetailAPIView(APIView):
