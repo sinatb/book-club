@@ -1,8 +1,8 @@
 from bookclubapi.models import User
-from django.test import TestCase
+from rest_framework.test import APITestCase
 
 
-class BookClubTestBase(TestCase):
+class BookClubTestBase(APITestCase):
     @staticmethod
     def get_publisher(username, password):
         user = User.objects.create_user(
@@ -12,6 +12,7 @@ class BookClubTestBase(TestCase):
             user_type='publisher'
         )
         return user
+
     @staticmethod
     def get_basic(username, password):
         user = User.objects.create_user(
