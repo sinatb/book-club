@@ -3,10 +3,12 @@ import datetime
 from rest_framework.test import APIClient
 from rest_framework import status
 from bookclubapi.models import Book, Comment
-from bookclubapi.serializers import BookSerializer
+from bookclubapi.serializers import BookSerializer, CommentSerializer
 from .fixture import BookClubFixture
 
+
 # Create your tests here.
+
 
 class BookAPITests(BookClubFixture):
 
@@ -35,6 +37,7 @@ class BookAPITests(BookClubFixture):
         self.c1 = Comment.objects.create(user=self.user,
                                          book=self.b1,
                                          content="test comment")
+
     def test_get_books(self):
         response = self.client.get('/books/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -60,7 +63,7 @@ class BookAPITests(BookClubFixture):
             'name': "Test Book 5",
             'publisher_id': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
-            'Genre': 'test3'
+            'genre': 'test3'
         })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -68,9 +71,9 @@ class BookAPITests(BookClubFixture):
         self.client.force_authenticate(user=self.user)
         response = self.client.post('/books/', data={
             'name': "Test Book 2",
-            'publisher_id': self.user.pk,
+            'publisher': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
-            'Genre': 'test2'
+            'genre': 'test2'
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.client.force_authenticate(user=None)
@@ -90,31 +93,31 @@ class BookAPITests(BookClubFixture):
         self.client.force_authenticate(user=self.user)
         response = self.client.delete('/books/30/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertFalse(Book.objects.filter(pk=self.b3.pk).exists())
         self.client.force_authenticate(user=None)
 
     def test_get_book_comments_unauthorized(self):
         response = self.client.get(f'/books/{self.b1.pk}/comments/')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_book_comments_success(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'/books/{self.b1.pk}/comments/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        serializer = CommentSerializer(Comment.objects.all(), many=True)
+        self.assertEqual(response.data, serializer.data)
         self.client.force_authenticate(user=None)
 
     def test_book_like_unauthorized(self):
         response = self.client.post(f'/books/{self.b3.pk}/like/', data={
-            'user': self.user.pk,
             'book': self.b3.pk,
         })
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_book_like_success(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(f'/books/{self.b3.pk}/like/', data={
-            'user': self.user.pk,
             'book': self.b3.pk,
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        b = Book.objects.get(pk=self.b3.pk)
+        self.assertEqual(b.like_count, 1)
         self.client.force_authenticate(user=None)
