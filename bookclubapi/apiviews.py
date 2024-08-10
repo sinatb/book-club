@@ -28,11 +28,11 @@ class CreateLike(generics.CreateAPIView):
 
 
 @api_view(['GET'])
-def get_comment_reports(self, request, pk):
+def get_comment_reports(self, pk):
     return Response({})
 
 
 @api_view(['GET'])
-def get_book_comments(self, request, pk):
+def get_book_comments(self, pk):
     return Response({})
 
