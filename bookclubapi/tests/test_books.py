@@ -95,7 +95,7 @@ class BookAPITests(BookClubFixture):
 
     def test_get_book_comments_unauthorized(self):
         response = self.client.get(f'/books/{self.b1.pk}/comments/')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_book_comments_success(self):
         self.client.force_authenticate(user=self.user)
@@ -117,7 +117,6 @@ class BookAPITests(BookClubFixture):
             'user': self.user.pk,
             'book': self.b3.pk,
         })
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         b = Book.objects.get(pk=self.b3.pk)
         self.assertEqual(b.like_count, 1)

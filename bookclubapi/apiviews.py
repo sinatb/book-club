@@ -3,8 +3,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from bookclubapi.models import Book, Like
-from bookclubapi.serializers import BookSerializer, LikeSerializer
+from bookclubapi.models import Book, Like, Comment
+from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer
 from .permissions import IsPublisher, IsOwner
 
 
@@ -64,6 +64,9 @@ def get_comment_reports(self, pk):
 
 
 @api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
 def get_book_comments(self, pk):
-    return Response({})
-
+    book = get_object_or_404(Book, pk=pk)
+    comments = book.book_comments.all()
+    serializer = CommentSerializer(comments, many=True)
+    return Response(serializer.data)
