@@ -40,6 +40,5 @@ class ReportAPITests(BookClubFixture):
             'comment': self.c1.pk,
             'reason': 'test report'
         })
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.client.force_authenticate(user=None)
