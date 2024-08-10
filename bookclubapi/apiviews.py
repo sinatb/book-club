@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from bookclubapi.models import Book, Like, Comment
 from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer
-from .permissions import IsPublisher, IsOwner
+from .permissions import IsPublisher, IsOwner, IsCommentator
 
 
 class BookList(generics.ListCreateAPIView):
@@ -31,11 +31,20 @@ class BookDetail(generics.RetrieveDestroyAPIView):
 
 
 class CommentCreate(generics.CreateAPIView):
-    pass
+    queryset = Comment.objects.filter(is_reported=False)
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class CommentDetail(generics.RetrieveDestroyAPIView):
-    pass
+    queryset = Comment.objects.filter(is_reported=False)
+    serializer_class = CommentSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [permissions.IsAuthenticated(), IsCommentator()]
+        else:
+            return [permissions.IsAuthenticated()]
 
 
 class ReportCreate(generics.CreateAPIView):
@@ -59,8 +68,12 @@ class LikeCreate(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
 def get_comment_reports(self, pk):
-    return Response({})
+    comment = get_object_or_404(Comment, pk=pk)
+    reports = comment.reports.all()
+    serializer = CommentSerializer(reports, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['GET'])
