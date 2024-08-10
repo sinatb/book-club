@@ -2,7 +2,7 @@ from bookclubapi.models import User
 from rest_framework.test import APITestCase
 
 
-class BookClubTestBase(APITestCase):
+class BookClubFixture(APITestCase):
     @staticmethod
     def get_publisher(username, password):
         user = User.objects.create_user(
