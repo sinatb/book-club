@@ -1,10 +1,20 @@
 from rest_framework.decorators import api_view
-from rest_framework import generics
+from rest_framework import generics, permissions
 from rest_framework.response import Response
+from bookclubapi.models import Book
+from bookclubapi.serializers import BookSerializer
+from .permissions import IsPublisher
 
 
 class BookList(generics.ListCreateAPIView):
-    pass
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        elif self.request.method == 'POST':
+            return [permissions.IsAuthenticated(), IsPublisher()]
 
 
 class BookDetail(generics.RetrieveDestroyAPIView):

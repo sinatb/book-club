@@ -8,6 +8,7 @@ from .fixture import BookClubFixture
 
 # Create your tests here.
 
+
 class BookAPITests(BookClubFixture):
 
     def setUp(self):
@@ -60,7 +61,7 @@ class BookAPITests(BookClubFixture):
             'name': "Test Book 5",
             'publisher_id': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
-            'Genre': 'test3'
+            'genre': 'test3'
         })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -68,9 +69,9 @@ class BookAPITests(BookClubFixture):
         self.client.force_authenticate(user=self.user)
         response = self.client.post('/books/', data={
             'name': "Test Book 2",
-            'publisher_id': self.user.pk,
+            'publisher': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
-            'Genre': 'test2'
+            'genre': 'test2'
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.client.force_authenticate(user=None)
