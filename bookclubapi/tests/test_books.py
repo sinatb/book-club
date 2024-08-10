@@ -15,22 +15,22 @@ class BookAPITests(BookClubTestBase):
     def setUp(self):
         self.user = BookClubTestBase.get_publisher('publisher', 'password')
         self.b1 = Book.objects.create(name="Test Book",
-                                      publisher_id=self.user.pk,
+                                      publisher=self.user,
                                       publish_date=datetime.date(2020, 1, 1),
                                       Genre="test")
 
         self.b2 = Book.objects.create(name="Test Book 2",
-                                      publisher_id=self.user.pk,
+                                      publisher=self.user,
                                       publish_date=datetime.date(2023, 1, 1),
                                       Genre="test2")
 
         self.b3 = Book.objects.create(name="Test Book 3",
-                                      publisher_id=self.user.pk,
+                                      publisher=self.user,
                                       publish_date=datetime.date(2025, 1, 1),
                                       Genre="test")
 
         self.b4 = Book.objects.create(name="Test Book 4",
-                                      publisher_id=self.user.pk,
+                                      publisher=self.user,
                                       publish_date=datetime.date(2003, 1, 1),
                                       Genre="test2")
 
