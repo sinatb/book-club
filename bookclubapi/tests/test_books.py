@@ -55,13 +55,14 @@ class BookAPITests(BookClubTestBase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_book_unauthorized(self):
+        client.force_authenticate(user=self.user)
         response = client.post('/books/', data={
             'name': "Test Book 5",
             'publisher_id': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'Genre': 'test3'
         })
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_post_book_success(self):
         client.force_authenticate(user=self.user)
@@ -76,12 +77,12 @@ class BookAPITests(BookClubTestBase):
 
     def test_delete_book_unauthorized(self):
         response = client.delete(f'/books/{self.b3.pk}/')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_book_success(self):
         client.force_authenticate(user=self.user)
         response = client.delete(f'/books/{self.b3.pk}/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Book.objects.filter(pk=self.b3.pk).exists())
         client.force_authenticate(user=None)
 
