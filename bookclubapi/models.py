@@ -60,8 +60,8 @@ class Like(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='book_comments')
     content = models.TextField()
     is_reported = models.BooleanField(default=False)
 
@@ -71,7 +71,7 @@ class Comment(models.Model):
         unique_together = ("user", "book")
         index_together = ('user', 'book')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} commented on {self.book}"
 
 
@@ -85,5 +85,5 @@ class Report(models.Model):
         verbose_name_plural = _("Reports")
         unique_together = ('user', 'comment')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} reported {self.comment}"
