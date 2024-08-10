@@ -6,6 +6,7 @@ from bookclubapi.models import Book, Comment
 from bookclubapi.serializers import BookSerializer, CommentSerializer
 from .fixture import BookClubFixture
 
+
 # Create your tests here.
 
 
@@ -36,6 +37,7 @@ class BookAPITests(BookClubFixture):
         self.c1 = Comment.objects.create(user=self.user,
                                          book=self.b1,
                                          content="test comment")
+
     def test_get_books(self):
         response = self.client.get('/books/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -106,7 +108,6 @@ class BookAPITests(BookClubFixture):
 
     def test_book_like_unauthorized(self):
         response = self.client.post(f'/books/{self.b3.pk}/like/', data={
-            'user': self.user.pk,
             'book': self.b3.pk,
         })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -114,7 +115,6 @@ class BookAPITests(BookClubFixture):
     def test_book_like_success(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(f'/books/{self.b3.pk}/like/', data={
-            'user': self.user.pk,
             'book': self.b3.pk,
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

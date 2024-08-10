@@ -11,7 +11,8 @@ class BookSerializer(serializers.ModelSerializer):
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
-        exclude = []
+        exclude = ['user']
+
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
