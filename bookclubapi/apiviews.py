@@ -59,8 +59,12 @@ class LikeCreate(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
 def get_comment_reports(self, pk):
-    return Response({})
+    comment = get_object_or_404(Comment, pk=pk)
+    reports = comment.reports.all()
+    serializer = CommentSerializer(reports, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['GET'])
