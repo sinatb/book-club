@@ -76,8 +76,8 @@ class Comment(models.Model):
 
 
 class Report(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports')
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='reports')
     reason = models.TextField()
 
     class Meta:

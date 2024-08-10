@@ -62,11 +62,11 @@ class CommentAPITests(BookClubFixture):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_comments_reports_unauthorized(self):
-        response = self.client.get(f'/comments/{self.c1.pk}/reports')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(f'/comments/{self.c1.pk}/reports/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_comments_reports_authorized(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/comments/{self.c1.pk}/reports')
+        response = self.client.get(f'/comments/{self.c1.pk}/reports/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.force_authenticate(user=None)
