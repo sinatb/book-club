@@ -3,7 +3,7 @@ import datetime
 from rest_framework.test import APIClient
 from rest_framework import status
 from bookclubapi.models import Book, Comment
-from bookclubapi.serializers import BookSerializer
+from bookclubapi.serializers import BookSerializer, CommentSerializer
 from .fixture import BookClubFixture
 
 # Create your tests here.
@@ -91,7 +91,6 @@ class BookAPITests(BookClubFixture):
         self.client.force_authenticate(user=self.user)
         response = self.client.delete('/books/30/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertFalse(Book.objects.filter(pk=self.b3.pk).exists())
         self.client.force_authenticate(user=None)
 
     def test_get_book_comments_unauthorized(self):
@@ -101,7 +100,8 @@ class BookAPITests(BookClubFixture):
     def test_get_book_comments_success(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'/books/{self.b1.pk}/comments/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        serializer = CommentSerializer(Comment.objects.all(), many=True)
+        self.assertEqual(response.data, serializer.data)
         self.client.force_authenticate(user=None)
 
     def test_book_like_unauthorized(self):
@@ -118,4 +118,5 @@ class BookAPITests(BookClubFixture):
             'book': self.b3.pk,
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(self.b3.likes.count(), 1)
         self.client.force_authenticate(user=None)

@@ -3,7 +3,7 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from bookclubapi.models import Book
 from bookclubapi.serializers import BookSerializer
-from .permissions import IsPublisher
+from .permissions import IsPublisher, IsOwner
 
 
 class BookList(generics.ListCreateAPIView):
@@ -18,7 +18,14 @@ class BookList(generics.ListCreateAPIView):
 
 
 class BookDetail(generics.RetrieveDestroyAPIView):
-    pass
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        elif self.request.method == 'DELETE':
+            return [permissions.IsAuthenticated(), IsPublisher(), IsOwner()]
 
 
 class CommentCreate(generics.CreateAPIView):
