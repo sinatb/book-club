@@ -1,26 +1,26 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
+
 
 # Create your models here.
 
 
-class User(AbstractUser):
+class User(AbstractUser, PermissionsMixin):
+    class TypeChoices(models.TextChoices):
+        BASIC = 'basic', _("Basic")
+        PUBLISHER = 'publisher', _("Publisher")
 
-    USER_TYPE_CHOICES = (
-        ("basic", "Basic"),
-        ("publisher", "Publisher")
-    )
-
-    user_type = models.CharField(_("User Type"), max_length=10, choices=USER_TYPE_CHOICES)
-    email = models.EmailField(_("Email Address"), max_length=255, unique=True)
+    user_type = models.CharField(verbose_name=_("User Type"), max_length=10, choices=TypeChoices.choices,
+                                 default=TypeChoices.BASIC)
+    email = models.EmailField(verbose_name=_("Email Address"), max_length=255, unique=True)
 
     REQUIRED_FIELDS = ['email', 'user_type']
 
-    def is_basic(self):
+    def is_basic(self) -> bool:
         return self.user_type == "basic"
 
-    def is_publisher(self):
+    def is_publisher(self) -> bool:
         return self.user_type == "publisher"
 
     class Meta:
@@ -29,40 +29,37 @@ class User(AbstractUser):
 
 
 class Book(models.Model):
-
     name = models.CharField(max_length=100)
     publisher = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)
     publish_date = models.DateTimeField()
     like_count = models.IntegerField(default=0)
-    Genre = models.CharField(max_length=100)
+    genre = models.CharField(max_length=100)
 
     class Meta:
         verbose_name = _("Book")
         verbose_name_plural = _("Books")
         ordering = ['publish_date']
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
 class Like(models.Model):
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='books_likes')
 
     class Meta:
         verbose_name = _("Like")
         verbose_name_plural = _("Likes")
         unique_together = ('user', 'book')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} liked {self.book}"
 
 
 class Comment(models.Model):
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     content = models.TextField()
@@ -72,13 +69,13 @@ class Comment(models.Model):
         verbose_name = _("comment")
         verbose_name_plural = _("comments")
         unique_together = ("user", "book")
+        index_together = ('user', 'book')
 
     def __str__(self):
         return f"{self.user} commented on {self.book}"
 
 
 class Report(models.Model):
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
     reason = models.TextField()
