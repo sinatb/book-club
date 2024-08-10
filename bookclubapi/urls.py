@@ -1,6 +1,6 @@
 from django.urls import path
 from .apiviews import (BookList, BookDetail, CommentCreate, CommentDetail, ReportCreate,
-                       get_book_comments, get_comment_reports, CreateLike)
+                       get_book_comments, get_comment_reports, LikeCreate)
 
 urlpatterns = [
     path('books/', BookList.as_view(), name='get_book_list'),
@@ -10,5 +10,5 @@ urlpatterns = [
     path('reports/', ReportCreate.as_view(), name='create_report'),
     path('comments/<int:pk>/reports/', get_comment_reports, name='get_comment_reports'),
     path('books/<int:pk>/comments/', get_book_comments, name='get_book_comments'),
-    path('books/<int:pk>/like/', CreateLike.as_view(), name='create_like'),
+    path('books/<int:pk>/like/', LikeCreate.as_view(), name='create_like'),
 ]

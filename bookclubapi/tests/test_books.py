@@ -109,7 +109,7 @@ class BookAPITests(BookClubFixture):
             'user': self.user.pk,
             'book': self.b3.pk,
         })
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_book_like_success(self):
         self.client.force_authenticate(user=self.user)
@@ -117,6 +117,8 @@ class BookAPITests(BookClubFixture):
             'user': self.user.pk,
             'book': self.b3.pk,
         })
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(self.b3.likes.count(), 1)
+        b = Book.objects.get(pk=self.b3.pk)
+        self.assertEqual(b.like_count, 1)
         self.client.force_authenticate(user=None)
