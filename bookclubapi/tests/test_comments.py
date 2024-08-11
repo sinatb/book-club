@@ -23,16 +23,14 @@ class CommentAPITests(BookClubFixture):
                                          content="test comment")
 
     def test_create_comment_fail(self):
-        response = self.client.post('/comments/', data={
-            'book': self.b1.pk,
+        response = self.client.post(f'/book/{self.b1.pk}/comments/', data={
             'content': 'test comment'
         })
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_comment_success(self):
         self.client.force_authenticate(user=self.commentator)
-        response = self.client.post('/comments/', data={
-            'book': self.b1.pk,
+        response = self.client.post(f'/books/{self.b1.pk}/comment/', data={
             'content': 'test comment'
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

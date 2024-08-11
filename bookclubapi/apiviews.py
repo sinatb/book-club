@@ -47,7 +47,8 @@ class CommentCreate(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        b = get_object_or_404(Book, pk=self.kwargs['pk'])
+        serializer.save(user=self.request.user, book=b)
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -80,6 +81,9 @@ class LikeCreate(APIView):
             'user': request.user.pk,
             'book': book.pk,
         }
+        like_idem = Like.objects.filter(**like)
+        if like_idem.exists():  # Idempotent
+            return Response("Already Commented",status=status.HTTP_208_ALREADY_REPORTED)
         serializer = self.serializer_class(data=like)
         book.like_count += 1
         book.save(force_update=True)
@@ -119,7 +123,7 @@ def get_book_comments(request, pk):
 def post_book_rating(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if Rating.objects.filter(user=request.user, book=book).exists():
-        return Response('Already liked', status=status.HTTP_400_BAD_REQUEST)
+        return Response('Already liked', status=status.HTTP_208_ALREADY_REPORTED)
     rating = book.rating * book.rating_count + request.data.get('rating')
     book.rating_count += 1
     rating /= book.rating_count

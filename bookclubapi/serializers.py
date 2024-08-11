@@ -33,7 +33,7 @@ class LikeSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        exclude = ['user']
+        exclude = ['user', 'book']
 
 
 class ReportSerializer(serializers.ModelSerializer):
