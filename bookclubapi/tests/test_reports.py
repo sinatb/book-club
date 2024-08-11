@@ -26,19 +26,16 @@ class ReportAPITests(BookClubFixture):
                                         reason="test report")
 
     def test_report_create_unauthorized(self):
-        response = self.client.post('/reports/', data={
-            'user': self.user.pk,
-            'comment': self.c1.pk,
+        response = self.client.post(f'/comments/{self.c1.pk}/report/', data={
             'reason': 'test report'
         })
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_report_create_success(self):
         self.client.force_authenticate(user=self.commentator)
-        response = self.client.post('/reports/', data={
-            'user': self.commentator.pk,
-            'comment': self.c1.pk,
+        response = self.client.post(f'/comments/{self.c1.pk}/report/', data={
             'reason': 'test report'
         })
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.client.force_authenticate(user=None)

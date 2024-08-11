@@ -82,6 +82,10 @@ class ReportCreate(generics.CreateAPIView):
     serializer_class = ReportSerializer
     permission_classes = [permissions.IsAuthenticated, IsCommentator]
 
+    def perform_create(self, serializer):
+        c = get_object_or_404(Comment, pk=self.kwargs['pk'])
+        serializer.save(user=self.request.user, comment=c)
+
 
 class LikeCreate(APIView):
     queryset = Like.objects.all()
