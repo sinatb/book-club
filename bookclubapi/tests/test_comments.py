@@ -24,7 +24,6 @@ class CommentAPITests(BookClubFixture):
 
     def test_create_comment_fail(self):
         response = self.client.post('/comments/', data={
-            'user': self.commentator.pk,
             'book': self.b1.pk,
             'content': 'test comment'
         })
@@ -33,7 +32,6 @@ class CommentAPITests(BookClubFixture):
     def test_create_comment_success(self):
         self.client.force_authenticate(user=self.commentator)
         response = self.client.post('/comments/', data={
-            'user': self.commentator.pk,
             'book': self.b1.pk,
             'content': 'test comment'
         })
@@ -77,7 +75,6 @@ class CommentAPITests(BookClubFixture):
 
     def test_comment_update_unauthorized(self):
         response = self.client.put(f'/comments/{self.c1.pk}/', data={
-            'user': self.commentator.pk,
             'book': self.b1.pk,
             'content': 'test comment'
         })
@@ -86,7 +83,6 @@ class CommentAPITests(BookClubFixture):
     def test_comment_update_successful(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.put(f'/comments/{self.c1.pk}/', data={
-            'user': self.user.pk,
             'book': self.b1.pk,
             'content': 'test comment 1'
         })

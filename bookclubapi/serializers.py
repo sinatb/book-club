@@ -17,7 +17,7 @@ class LikeSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        exclude = []
+        exclude = ['user']
 
 
 class ReportSerializer(serializers.ModelSerializer):

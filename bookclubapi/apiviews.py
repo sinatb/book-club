@@ -33,12 +33,18 @@ class BookDetail(generics.RetrieveUpdateDestroyAPIView):
 class CommentCreate(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsCommentator]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.filter(is_reported=False)
     serializer_class = CommentSerializer
+
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
 
     def get_permissions(self):
         if self.request.method == 'DELETE' or self.request.method == 'PUT':
@@ -59,14 +65,25 @@ class LikeCreate(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        serializer = self.serializer_class(data=request.data)
+        book = get_object_or_404(Book, pk=pk)
+        like = {
+            'user': request.user.pk,
+            'book': book.pk,
+        }
+        serializer = self.serializer_class(data=like)
+        book.like_count += 1
+        book.save(force_update=True)
         if serializer.is_valid():
-            book = get_object_or_404(Book, pk=pk)
-            book.like_count += 1
-            book.save(force_update=True)
             serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, pk):
+        book = get_object_or_404(Book, pk=pk)
+        like = get_object_or_404(Like, book=book, user=request.user)
+        book.like_count -= 1
+        book.save(force_update=True)
+        like.delete()
+        return Response({'deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
