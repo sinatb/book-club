@@ -142,3 +142,10 @@ class BookAPITests(BookClubFixture):
         })
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_book_rating_success(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(f'/books/{self.b1.pk}/rate/', data={
+            'rating': 5
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.force_authenticate(user=None)

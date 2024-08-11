@@ -97,7 +97,7 @@ class LikeCreate(APIView):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_comment_reports(self, pk):
+def get_comment_reports(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     reports = comment.reports.all()
     serializer = CommentSerializer(reports, many=True)
@@ -106,8 +106,20 @@ def get_comment_reports(self, pk):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_book_comments(self, pk):
+def get_book_comments(request, pk):
     book = get_object_or_404(Book, pk=pk)
     comments = book.book_comments.all()
     serializer = CommentSerializer(comments, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def post_book_rating(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    rating = book.rating * book.rating_count + request.data.get('rating')
+    book.rating_count += 1
+    rating /= book.rating_count
+    book.rating = rating
+    book.save(force_update=True)
+    return Response(rating, status=status.HTTP_200_OK)
