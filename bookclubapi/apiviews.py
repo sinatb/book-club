@@ -4,8 +4,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from bookclubapi.models import Book, Like, Comment, Report
-from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer
+from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer, UserSerializer
 from .permissions import IsPublisher, IsOwner, IsCommentator
+
+
+class SignUpView(APIView):
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class BookList(generics.ListCreateAPIView):

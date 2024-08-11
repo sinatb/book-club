@@ -31,7 +31,7 @@ class ReportAPITests(BookClubFixture):
             'comment': self.c1.pk,
             'reason': 'test report'
         })
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_report_create_success(self):
         self.client.force_authenticate(user=self.commentator)
