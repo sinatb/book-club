@@ -61,7 +61,7 @@ class BookAPITests(BookClubFixture):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_book_unauthorized(self):
-        response = self.client.post('/books/', data={
+        response = self.client.post('/book/', data={
             'name': "Test Book 5",
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test3'
@@ -70,7 +70,7 @@ class BookAPITests(BookClubFixture):
 
     def test_post_book_success(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.post('/books/', data={
+        response = self.client.post('/book/', data={
             'name': "Test Book 2",
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test2'

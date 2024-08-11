@@ -27,17 +27,21 @@ class SignUpView(APIView):
         return Response("User Created", status=status.HTTP_201_CREATED)
 
 
-class BookList(generics.ListCreateAPIView):
+class BookCreateView(generics.CreateAPIView):
     queryset = Book.objects.all()
+    permission_classes = [permissions.IsAuthenticated, IsPublisher]
     serializer_class = BookSerializer
 
     def perform_create(self, serializer):
         serializer.save(publisher=self.request.user)
 
-    def get_permissions(self):
-        if self.request.method == 'POST' or self.request.method == 'PUT' or self.request.method == 'DELETE':
-            return [permissions.IsAuthenticated(), IsPublisher()]
-        return [permissions.AllowAny()]
+
+class BookList(generics.ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(publisher=self.request.user)
 
 
 class BookDetail(generics.RetrieveUpdateDestroyAPIView):
