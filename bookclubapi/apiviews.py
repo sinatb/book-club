@@ -3,20 +3,32 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from bookclubapi.models import Book, Like, Comment, Report
-from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer
+from bookclubapi.models import Book, Like, Comment, Report, Rating
+from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer, UserSerializer, \
+    RatingSerializer
 from .permissions import IsPublisher, IsOwner, IsCommentator
+
+
+class SignUpView(APIView):
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class BookList(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(publisher=self.request.user)
+
     def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-        elif self.request.method == 'POST':
+        if self.request.method == 'POST' or self.request.method == 'PUT' or self.request.method == 'DELETE':
             return [permissions.IsAuthenticated(), IsPublisher()]
+        return [permissions.AllowAny()]
 
 
 class BookDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -24,10 +36,9 @@ class BookDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookSerializer
 
     def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.AllowAny()]
-        elif self.request.method == 'DELETE' or self.request.method == 'PUT':
+        if self.request.method == 'DELETE' or self.request.method == 'PUT' or self.request.method == 'POST':
             return [permissions.IsAuthenticated(), IsPublisher(), IsOwner()]
+        return [permissions.AllowAny()]
 
 
 class CommentCreate(generics.CreateAPIView):
@@ -47,10 +58,9 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer.save(user=self.request.user)
 
     def get_permissions(self):
-        if self.request.method == 'DELETE' or self.request.method == 'PUT':
+        if self.request.method == 'DELETE' or self.request.method == 'PUT' or self.request.method == 'POST':
             return [permissions.IsAuthenticated(), IsCommentator()]
-        else:
-            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated()]
 
 
 class ReportCreate(generics.CreateAPIView):
@@ -88,7 +98,7 @@ class LikeCreate(APIView):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_comment_reports(self, pk):
+def get_comment_reports(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     reports = comment.reports.all()
     serializer = CommentSerializer(reports, many=True)
@@ -97,8 +107,28 @@ def get_comment_reports(self, pk):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_book_comments(self, pk):
+def get_book_comments(request, pk):
     book = get_object_or_404(Book, pk=pk)
     comments = book.book_comments.all()
     serializer = CommentSerializer(comments, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def post_book_rating(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if Rating.objects.filter(user=request.user, book=book).exists():
+        return Response('Already liked', status=status.HTTP_400_BAD_REQUEST)
+    rating = book.rating * book.rating_count + request.data.get('rating')
+    book.rating_count += 1
+    rating /= book.rating_count
+    book.rating = rating
+    book.save(force_update=True)
+    rating = {
+        'rating': rating
+    }
+    serializer = RatingSerializer(data=rating)
+    if serializer.is_valid():
+        serializer.save(user=request.user, book=book)
+    return Response(rating, status=status.HTTP_201_CREATED)

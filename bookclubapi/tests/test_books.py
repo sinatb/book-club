@@ -44,7 +44,6 @@ class BookAPITests(BookClubFixture):
     def test_get_books(self):
         response = self.client.get('/books/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         books = Book.objects.all()
         serializer = BookSerializer(books, many=True)
 
@@ -64,17 +63,15 @@ class BookAPITests(BookClubFixture):
     def test_post_book_unauthorized(self):
         response = self.client.post('/books/', data={
             'name': "Test Book 5",
-            'publisher_id': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test3'
         })
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_post_book_success(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.post('/books/', data={
             'name': "Test Book 2",
-            'publisher': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test2'
         })
@@ -83,7 +80,7 @@ class BookAPITests(BookClubFixture):
 
     def test_delete_book_unauthorized(self):
         response = self.client.delete(f'/books/{self.b3.pk}/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_delete_book_success(self):
         self.client.force_authenticate(user=self.user)
@@ -100,7 +97,7 @@ class BookAPITests(BookClubFixture):
 
     def test_get_book_comments_unauthorized(self):
         response = self.client.get(f'/books/{self.b1.pk}/comments/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_book_comments_success(self):
         self.client.force_authenticate(user=self.user)
@@ -111,7 +108,7 @@ class BookAPITests(BookClubFixture):
 
     def test_book_like_unauthorized(self):
         response = self.client.post(f'/books/{self.b3.pk}/like/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_book_like_success(self):
         self.client.force_authenticate(user=self.user)
@@ -131,7 +128,6 @@ class BookAPITests(BookClubFixture):
         self.client.force_authenticate(user=self.user)
         response = self.client.put(f'/books/{self.b3.pk}/', data={
             'name': "shahname",
-            'publisher': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test2'
         })
@@ -141,9 +137,27 @@ class BookAPITests(BookClubFixture):
     def test_book_update_unauthorized(self):
         response = self.client.put(f'/books/{self.b3.pk}/', data={
             'name': "shahname",
-            'publisher': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test2'
         })
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_book_rating_success(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(f'/books/{self.b3.pk}/rate/', data={
+            'rating': 5
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.client.force_authenticate(user=None)
+
+    def test_book_rating_duplicate(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(f'/books/{self.b1.pk}/rate/', data={
+            'rating': 5
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(f'/books/{self.b1.pk}/rate/', data={
+            'rating': 5
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.client.force_authenticate(user=None)

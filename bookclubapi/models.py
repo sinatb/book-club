@@ -87,3 +87,14 @@ class Report(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user} reported {self.comment}"
+
+
+class Rating(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='ratings')
+    rating = models.FloatField(default=0)
+
+    class Meta:
+        verbose_name = _("Rating")
+        verbose_name_plural = _("Ratings")
+        unique_together = ('user', 'book')

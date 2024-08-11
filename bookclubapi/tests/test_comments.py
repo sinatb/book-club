@@ -27,7 +27,7 @@ class CommentAPITests(BookClubFixture):
             'book': self.b1.pk,
             'content': 'test comment'
         })
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_comment_success(self):
         self.client.force_authenticate(user=self.commentator)
@@ -49,7 +49,7 @@ class CommentAPITests(BookClubFixture):
 
     def test_delete_comment_fail(self):
         response = self.client.delete(f'/comments/{self.c1.pk}/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_delete_comment_fail_not_self(self):
         self.client.force_authenticate(user=self.commentator)
@@ -65,7 +65,7 @@ class CommentAPITests(BookClubFixture):
 
     def test_get_comments_reports_unauthorized(self):
         response = self.client.get(f'/comments/{self.c1.pk}/reports/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_comments_reports_authorized(self):
         self.client.force_authenticate(user=self.user)
@@ -78,7 +78,7 @@ class CommentAPITests(BookClubFixture):
             'book': self.b1.pk,
             'content': 'test comment'
         })
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_comment_update_successful(self):
         self.client.force_authenticate(user=self.user)
