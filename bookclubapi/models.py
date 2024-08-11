@@ -10,9 +10,10 @@ class User(AbstractUser, PermissionsMixin):
     class TypeChoices(models.TextChoices):
         BASIC = 'basic', _("Basic")
         PUBLISHER = 'publisher', _("Publisher")
+        ADMIN = 'admin', _("Admin")
 
     user_type = models.CharField(verbose_name=_("User Type"), max_length=10, choices=TypeChoices.choices,
-                                 default=TypeChoices.BASIC)
+                                 default=TypeChoices.ADMIN)
     email = models.EmailField(verbose_name=_("Email Address"), max_length=255, unique=True)
 
     REQUIRED_FIELDS = ['email', 'user_type']
