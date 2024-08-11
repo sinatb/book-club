@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Book, Like, Comment, Report, User
+from .models import Book, Like, Comment, Report, User, Rating
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,3 +40,9 @@ class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         exclude = []
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        exclude = ['user', 'book']

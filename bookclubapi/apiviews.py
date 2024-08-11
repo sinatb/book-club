@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from bookclubapi.models import Book, Like, Comment, Report
-from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer, UserSerializer
+from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer, UserSerializer, \
+    RatingSerializer
 from .permissions import IsPublisher, IsOwner, IsCommentator
 
 
@@ -122,4 +123,10 @@ def post_book_rating(request, pk):
     rating /= book.rating_count
     book.rating = rating
     book.save(force_update=True)
-    return Response(rating, status=status.HTTP_200_OK)
+    rating = {
+        'rating': rating
+    }
+    serializer = RatingSerializer(data=rating)
+    if serializer.is_valid():
+        serializer.save(user=request.user, book=book)
+    return Response(rating, status=status.HTTP_201_CREATED)
