@@ -46,7 +46,6 @@ class CommentAPITests(BookClubFixture):
         comment = Comment.objects.get(id=self.c1.pk)
         serializer = CommentSerializer(comment)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        print(response.data, serializer)
         self.assertEqual(response.data, serializer.data)
         self.client.force_authenticate(user=None)
 
@@ -73,5 +72,23 @@ class CommentAPITests(BookClubFixture):
     def test_get_comments_reports_authorized(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'/comments/{self.c1.pk}/reports/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.force_authenticate(user=None)
+
+    def test_comment_update_unauthorized(self):
+        response = self.client.put(f'/comments/{self.c1.pk}/', data={
+            'user': self.commentator.pk,
+            'book': self.b1.pk,
+            'content': 'test comment'
+        })
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_comment_update_successful(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(f'/comments/{self.c1.pk}/', data={
+            'user': self.user.pk,
+            'book': self.b1.pk,
+            'content': 'test comment 1'
+        })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.force_authenticate(user=None)
