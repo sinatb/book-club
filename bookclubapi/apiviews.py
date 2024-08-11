@@ -19,14 +19,14 @@ class BookList(generics.ListCreateAPIView):
             return [permissions.IsAuthenticated(), IsPublisher()]
 
 
-class BookDetail(generics.RetrieveDestroyAPIView):
+class BookDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
     def get_permissions(self):
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
-        elif self.request.method == 'DELETE':
+        elif self.request.method == 'DELETE' or self.request.method == 'PUT':
             return [permissions.IsAuthenticated(), IsPublisher(), IsOwner()]
 
 
@@ -36,12 +36,12 @@ class CommentCreate(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsCommentator]
 
 
-class CommentDetail(generics.RetrieveDestroyAPIView):
+class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.filter(is_reported=False)
     serializer_class = CommentSerializer
 
     def get_permissions(self):
-        if self.request.method == 'DELETE':
+        if self.request.method == 'DELETE' or self.request.method == 'PUT':
             return [permissions.IsAuthenticated(), IsCommentator()]
         else:
             return [permissions.IsAuthenticated()]
