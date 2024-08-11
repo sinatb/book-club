@@ -9,13 +9,22 @@ from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSeria
 from .permissions import IsPublisher, IsOwner, IsCommentator
 
 
+class UserView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+
 class SignUpView(APIView):
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response("User Created", status=status.HTTP_201_CREATED)
 
 
 class BookList(generics.ListCreateAPIView):
