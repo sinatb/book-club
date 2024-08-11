@@ -33,12 +33,18 @@ class BookDetail(generics.RetrieveUpdateDestroyAPIView):
 class CommentCreate(generics.CreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsCommentator]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.filter(is_reported=False)
     serializer_class = CommentSerializer
+
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
 
     def get_permissions(self):
         if self.request.method == 'DELETE' or self.request.method == 'PUT':

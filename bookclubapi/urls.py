@@ -3,6 +3,8 @@ from .apiviews import (BookList, BookDetail, CommentCreate, CommentDetail, Repor
                        get_book_comments, get_comment_reports, LikeCreate)
 
 urlpatterns = [
+    # path('login/'),
+    # path('signup/'),
     path('books/', BookList.as_view(), name='get_book_list'),
     path('books/<int:pk>/', BookDetail.as_view(), name='get_book_detail'),
     path('comments/', CommentCreate.as_view(), name='create_comment'),
