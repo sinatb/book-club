@@ -3,7 +3,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from bookclubapi.models import Book, Like, Comment, Report
+from bookclubapi.models import Book, Like, Comment, Report, Rating
 from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer, UserSerializer, \
     RatingSerializer
 from .permissions import IsPublisher, IsOwner, IsCommentator
@@ -118,6 +118,8 @@ def get_book_comments(request, pk):
 @permission_classes([permissions.IsAuthenticated])
 def post_book_rating(request, pk):
     book = get_object_or_404(Book, pk=pk)
+    if Rating.objects.filter(user=request.user, book=book).exists():
+        return Response('Already liked', status=status.HTTP_400_BAD_REQUEST)
     rating = book.rating * book.rating_count + request.data.get('rating')
     book.rating_count += 1
     rating /= book.rating_count

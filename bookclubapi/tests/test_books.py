@@ -149,3 +149,15 @@ class BookAPITests(BookClubFixture):
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.client.force_authenticate(user=None)
+
+    def test_book_rating_duplicate(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(f'/books/{self.b1.pk}/rate/', data={
+            'rating': 5
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(f'/books/{self.b1.pk}/rate/', data={
+            'rating': 5
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.client.force_authenticate(user=None)
