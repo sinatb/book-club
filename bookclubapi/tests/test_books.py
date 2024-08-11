@@ -44,7 +44,6 @@ class BookAPITests(BookClubFixture):
     def test_get_books(self):
         response = self.client.get('/books/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         books = Book.objects.all()
         serializer = BookSerializer(books, many=True)
 
