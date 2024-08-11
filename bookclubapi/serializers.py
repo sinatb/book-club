@@ -21,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        exclude = []
+        exclude = ['publisher']
 
 
 class LikeSerializer(serializers.ModelSerializer):

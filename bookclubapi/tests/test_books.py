@@ -64,7 +64,6 @@ class BookAPITests(BookClubFixture):
     def test_post_book_unauthorized(self):
         response = self.client.post('/books/', data={
             'name': "Test Book 5",
-            'publisher_id': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test3'
         })
@@ -74,7 +73,6 @@ class BookAPITests(BookClubFixture):
         self.client.force_authenticate(user=self.user)
         response = self.client.post('/books/', data={
             'name': "Test Book 2",
-            'publisher': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test2'
         })
@@ -131,7 +129,6 @@ class BookAPITests(BookClubFixture):
         self.client.force_authenticate(user=self.user)
         response = self.client.put(f'/books/{self.b3.pk}/', data={
             'name': "shahname",
-            'publisher': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test2'
         })
@@ -141,7 +138,6 @@ class BookAPITests(BookClubFixture):
     def test_book_update_unauthorized(self):
         response = self.client.put(f'/books/{self.b3.pk}/', data={
             'name': "shahname",
-            'publisher': self.user.pk,
             'publish_date': datetime.date(2033, 4, 3),
             'genre': 'test2'
         })
