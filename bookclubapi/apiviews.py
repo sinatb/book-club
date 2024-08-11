@@ -73,9 +73,6 @@ class LikeCreate(APIView):
 
     def delete(self, request, pk):
         book = get_object_or_404(Book, pk=pk)
-        print(Like.objects.values())
-        print(book.name)
-        print(request.user)
         like = get_object_or_404(Like, book=book, user=request.user)
         book.like_count -= 1
         book.save(force_update=True)
