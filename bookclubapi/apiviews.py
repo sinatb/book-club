@@ -15,7 +15,13 @@ class UserView(APIView):
 
     def get(self, request):
         serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+        user_data = {
+            'id': serializer.data['id'],
+            'username': serializer.data['username'],
+            'user_type': serializer.data['user_type'],
+            'email': serializer.data['email'],
+        }
+        return Response(user_data)
 
 
 class SignUpView(APIView):
