@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from bookclubapi.models import Book, Like, Comment, Report, Rating
-from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer, UserSerializer, \
-    RatingSerializer
+from bookclubapi.serializers import (BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer,
+                                     UserSerializer, RatingSerializer)
 from .permissions import IsPublisher, IsOwner, IsCommentator
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -94,6 +94,8 @@ class ReportCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         c = get_object_or_404(Comment, pk=self.kwargs['pk'])
+        c.is_reported = True
+        c.save(force_update=True)
         serializer.save(user=self.request.user, comment=c)
 
 
@@ -179,5 +181,5 @@ def get_book_likes(request, pk):
 def get_comment_reports(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     reports = comment.reports.all()
-    serializer = CommentSerializer(reports, many=True)
+    serializer = ReportSerializer(reports, many=True)
     return Response(serializer.data)
