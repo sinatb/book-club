@@ -106,7 +106,7 @@ class LikeCreate(APIView):
         }
         like_idem = Like.objects.filter(**like)
         if like_idem.exists():  # Idempotent
-            return Response("Already Commented",status=status.HTTP_208_ALREADY_REPORTED)
+            return Response("Already Liked", status=status.HTTP_208_ALREADY_REPORTED)
         serializer = self.serializer_class(data=like)
         book.like_count += 1
         book.save(force_update=True)
