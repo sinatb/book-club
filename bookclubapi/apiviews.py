@@ -7,10 +7,10 @@ from bookclubapi.models import Book, Like, Comment, Report, Rating
 from bookclubapi.serializers import BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer, UserSerializer, \
     RatingSerializer
 from .permissions import IsPublisher, IsOwner, IsCommentator
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UserView(APIView):
-
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -29,8 +29,12 @@ class SignUpView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response("User Created", status=status.HTTP_201_CREATED)
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+
+        return Response({'refresh': str(refresh),
+                         'access': str(refresh.access_token),
+                         }, status=status.HTTP_201_CREATED)
 
 
 class BookCreateView(generics.CreateAPIView):
@@ -177,6 +181,3 @@ def get_comment_reports(request, pk):
     reports = comment.reports.all()
     serializer = CommentSerializer(reports, many=True)
     return Response(serializer.data)
-
-
-

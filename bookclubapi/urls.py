@@ -4,9 +4,11 @@ from .apiviews import (BookList, BookDetail, CommentCreate, CommentDetail, Repor
                        UserView, BookCreateView, get_book_likes)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
+    TokenRefreshView
 )
 urlpatterns = [
 
+    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('user/', UserView.as_view(), name='user_apis'),
     path('signin/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('signup/', SignUpView.as_view(), name='signup'),

@@ -3,6 +3,8 @@ from .models import Book, Like, Comment, Report, User, Rating
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
         exclude = []
