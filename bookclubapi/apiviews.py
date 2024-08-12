@@ -1,11 +1,13 @@
+from datetime import datetime
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from bookclubapi.models import Book, Like, Comment, Report, Rating
+from bookclubapi.models import Book, Like, Comment, Report, Rating, Subscription
 from bookclubapi.serializers import (BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer,
-                                     UserSerializer, RatingSerializer)
+                                     UserSerializer, RatingSerializer, SubscriberSerializer)
 from .permissions import IsPublisher, IsOwner, IsCommentator
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -47,16 +49,24 @@ class BookCreateView(generics.CreateAPIView):
 
 
 class BookList(generics.ListAPIView):
-    queryset = Book.objects.all()
     serializer_class = BookSerializer
+
+    def get_queryset(self):
+        if self.request.user.subscription_type is not None:
+            return Book.objects.all()
+        return Book.objects.filter(is_premium=False)
 
     def perform_create(self, serializer):
         serializer.save(publisher=self.request.user)
 
 
 class BookDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Book.objects.all()
     serializer_class = BookSerializer
+
+    def get_queryset(self):
+        if self.request.user.subscription_type:
+            return Book.objects.all()
+        return Book.objects.filter(is_premium=False)
 
     def get_permissions(self):
         if self.request.method == 'DELETE' or self.request.method == 'PUT' or self.request.method == 'POST':
@@ -71,6 +81,8 @@ class CommentCreate(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         b = get_object_or_404(Book, pk=self.kwargs['pk'])
+        if self.request.user.subscription_type is None and b.is_premium:
+            return Response("you cant rate this book", status=status.HTTP_403_FORBIDDEN)
         serializer.save(user=self.request.user, book=b)
 
 
@@ -106,6 +118,8 @@ class LikeCreate(APIView):
 
     def post(self, request, pk):
         book = get_object_or_404(Book, pk=pk)
+        if request.user.subscription_type is None and book.is_premium:
+            return Response("you cant rate this book", status=status.HTTP_403_FORBIDDEN)
         like = {
             'user': request.user.pk,
             'book': book.pk,
@@ -122,6 +136,8 @@ class LikeCreate(APIView):
 
     def delete(self, request, pk):
         book = get_object_or_404(Book, pk=pk)
+        if request.user.subscription_type is None and book.is_premium:
+            return Response("you cant rate this book", status=status.HTTP_403_FORBIDDEN)
         like = get_object_or_404(Like, book=book, user=request.user)
         book.like_count -= 1
         book.save(force_update=True)
@@ -142,6 +158,8 @@ def get_comment_reports(request, pk):
 @permission_classes([permissions.IsAuthenticated])
 def get_book_comments(request, pk):
     book = get_object_or_404(Book, pk=pk)
+    if request.user.subscription_type is None and book.is_premium:
+        return Response("you cant rate this book", status=status.HTTP_403_FORBIDDEN)
     comments = book.book_comments.all()
     serializer = CommentSerializer(comments, many=True)
     return Response(serializer.data)
@@ -151,6 +169,8 @@ def get_book_comments(request, pk):
 @permission_classes([permissions.IsAuthenticated])
 def post_book_rating(request, pk):
     book = get_object_or_404(Book, pk=pk)
+    if request.user.subscription_type is None and book.is_premium:
+        return Response("you cant rate this book", status=status.HTTP_403_FORBIDDEN)
     if Rating.objects.filter(user=request.user, book=book).exists():
         return Response('Already liked', status=status.HTTP_208_ALREADY_REPORTED)
     rating = book.rating * book.rating_count + request.data.get('rating')
@@ -183,3 +203,25 @@ def get_comment_reports(request, pk):
     reports = comment.reports.all()
     serializer = ReportSerializer(reports, many=True)
     return Response(serializer.data)
+
+
+class SubscriptionAPI(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        subscription_type = get_object_or_404(Subscription, pk=pk)
+        data = {
+            "start_date": datetime.now(),
+            "user": request.user.pk,
+            "sub_type": subscription_type.pk,
+        }
+        subscriber = SubscriberSerializer(
+            data=data
+        )
+        request.user.subscription_type = subscription_type
+        request.user.save()
+        if subscriber.is_valid():
+            subscriber.save()
+            return Response(subscriber.data, status=status.HTTP_201_CREATED)
+        return Response(subscriber.errors, status=status.HTTP_400_BAD_REQUEST)

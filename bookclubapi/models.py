@@ -5,6 +5,17 @@ from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
+class Subscription(models.Model):
+    class TypeChoices(models.TextChoices):
+        BASIC = 'BASIC', _("Basic")
+        BRONZE = 'BRONZE', _("Bronze")
+        SILVER = 'SILVER', _("Silver")
+        GOLD = 'GOLD', _("Gold")
+
+    price = models.IntegerField()
+    type = models.CharField(choices=TypeChoices.choices, max_length=20)
+    duration = models.IntegerField()
+
 
 class User(AbstractUser, PermissionsMixin):
     class TypeChoices(models.TextChoices):
@@ -14,6 +25,10 @@ class User(AbstractUser, PermissionsMixin):
     user_type = models.CharField(verbose_name=_("User Type"), max_length=10, choices=TypeChoices.choices,
                                  default=TypeChoices.BASIC)
     email = models.EmailField(verbose_name=_("Email Address"), max_length=255, unique=True)
+    subscription_type = models.ForeignKey(Subscription,
+                                          on_delete=models.SET_NULL,
+                                          verbose_name=_("Subscription Type"),
+                                          null=True)
 
     REQUIRED_FIELDS = ['email', 'user_type']
 
@@ -28,6 +43,15 @@ class User(AbstractUser, PermissionsMixin):
         verbose_name_plural = _('users')
 
 
+class Subscriber(models.Model):
+    sub_type = models.ForeignKey(
+        Subscription,
+        on_delete=models.CASCADE,
+    )
+    start_date = models.DateTimeField()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+
 class Book(models.Model):
     name = models.CharField(max_length=100)
     publisher = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -36,6 +60,7 @@ class Book(models.Model):
     publish_date = models.DateTimeField()
     like_count = models.IntegerField(default=0)
     genre = models.CharField(max_length=100)
+    is_premium = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Book")

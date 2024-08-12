@@ -1,7 +1,7 @@
 from django.urls import path
 from .apiviews import (BookList, BookDetail, CommentCreate, CommentDetail, ReportCreate,
                        get_book_comments, get_comment_reports, LikeCreate, SignUpView, post_book_rating,
-                       UserView, BookCreateView, get_book_likes)
+                       UserView, BookCreateView, get_book_likes, SubscriptionAPI)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView
@@ -23,4 +23,5 @@ urlpatterns = [
     path('books/<int:pk>/like/', LikeCreate.as_view(), name='create_like'),
     path('books/<int:pk>/rate/', post_book_rating, name="rate_book"),
     path('books/<int:pk>/likes/', get_book_likes, name='get_book_likes'),
+    path('subscriptions/<int:pk>/subscribe/', SubscriptionAPI.as_view(), name='subscribe'),
 ]
