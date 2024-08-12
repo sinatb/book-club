@@ -43,12 +43,12 @@ class User(AbstractUser, PermissionsMixin):
         verbose_name_plural = _('users')
 
 
-class Subscribers(models.Model):
+class Subscriber(models.Model):
     sub_type = models.ForeignKey(
         Subscription,
         on_delete=models.CASCADE,
     )
-    start_date = models.DateField()
+    start_date = models.DateTimeField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
 

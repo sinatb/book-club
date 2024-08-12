@@ -1,11 +1,13 @@
+from datetime import datetime
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from bookclubapi.models import Book, Like, Comment, Report, Rating
+from bookclubapi.models import Book, Like, Comment, Report, Rating, Subscription
 from bookclubapi.serializers import (BookSerializer, LikeSerializer, CommentSerializer, ReportSerializer,
-                                     UserSerializer, RatingSerializer)
+                                     UserSerializer, RatingSerializer, SubscriptionSerializer, SubscriberSerializer)
 from .permissions import IsPublisher, IsOwner, IsCommentator
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -183,3 +185,25 @@ def get_comment_reports(request, pk):
     reports = comment.reports.all()
     serializer = ReportSerializer(reports, many=True)
     return Response(serializer.data)
+
+
+class SubscriptionAPI(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        subscription_type = get_object_or_404(Subscription, pk=pk)
+        data = {
+            "start_date": datetime.now(),
+            "user": request.user.pk,
+            "sub_type": subscription_type.pk,
+        }
+        subscriber = SubscriberSerializer(
+            data=data
+        )
+        request.user.subscription_type = subscription_type
+        request.user.save()
+        if subscriber.is_valid():
+            subscriber.save()
+            return Response(subscriber.data, status=status.HTTP_201_CREATED)
+        return Response(subscriber.errors, status=status.HTTP_400_BAD_REQUEST)
