@@ -159,3 +159,24 @@ def post_book_rating(request, pk):
     if serializer.is_valid():
         serializer.save(user=request.user, book=book)
     return Response(rating, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_book_likes(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    likes = book.books_likes.all()
+    serializer = LikeSerializer(likes, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_comment_reports(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    reports = comment.reports.all()
+    serializer = CommentSerializer(reports, many=True)
+    return Response(serializer.data)
+
+
+

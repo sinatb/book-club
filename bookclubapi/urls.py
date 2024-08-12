@@ -1,7 +1,7 @@
 from django.urls import path
 from .apiviews import (BookList, BookDetail, CommentCreate, CommentDetail, ReportCreate,
                        get_book_comments, get_comment_reports, LikeCreate, SignUpView, post_book_rating,
-                       UserView, BookCreateView)
+                       UserView, BookCreateView, get_book_likes)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
 )
@@ -19,5 +19,6 @@ urlpatterns = [
     path('comments/<int:pk>/reports/', get_comment_reports, name='get_comment_reports'),
     path('books/<int:pk>/comments/', get_book_comments, name='get_book_comments'),
     path('books/<int:pk>/like/', LikeCreate.as_view(), name='create_like'),
-    path('books/<int:pk>/rate/', post_book_rating, name="rate_book")
+    path('books/<int:pk>/rate/', post_book_rating, name="rate_book"),
+    path('books/<int:pk>/likes/', get_book_likes, name='get_book_likes'),
 ]

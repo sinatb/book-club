@@ -161,3 +161,11 @@ class BookAPITests(BookClubFixture):
         })
         self.assertEqual(response.status_code, status.HTTP_208_ALREADY_REPORTED)
         self.client.force_authenticate(user=None)
+
+    def test_get_book_likes(self):
+        self.client.force_authenticate(user=self.user)
+        self.client.post(f'/books/{self.b3.pk}/like/')
+        print(self.b3.books_likes)
+        response = self.client.get(f'/books/{self.b3.pk}/likes/')
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
